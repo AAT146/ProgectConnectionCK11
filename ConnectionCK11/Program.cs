@@ -21,14 +21,19 @@ namespace WriteRequestCK11
 		public string user_host { get; set; }
 	}
 
-	class WriteRequest
+	class Value
 	{
-		public string writeType { get; set; }
 		public string uid { get; set; }
 		public string timeStamp { get; set; }
 		public string timeStamp2 { get; set; }
 		public long qCode { get; set; }
 		public double value { get; set; }
+	}
+
+	class WriteRequest
+	{
+		public string writeType { get; set; }
+		public List<Value> values { get; set; }
 	}
 
 	class Program
@@ -71,15 +76,25 @@ namespace WriteRequestCK11
 			webRequestWrite.Headers.Add("charset", "UTF-8");
 			webRequestWrite.Headers.Add("Authorization", token.token_type + " " + token.access_token);
 
-			WriteRequest bodyRequest = new WriteRequest();
-			bodyRequest.writeType = "forcedToArchive";
-			bodyRequest.uid = uid;
-			bodyRequest.timeStamp = timeStamp;
-			bodyRequest.timeStamp2 = timeStamp2;
-			bodyRequest.qCode = qCode;
-			bodyRequest.value = value;
+			WriteRequest bodyRequest = new WriteRequest
+			{
+				/*writeType = "forcedToArchive",*/
+				values = new List<Value>
+				{
+					new Value
+					{
+						uid = uid,
+						timeStamp = timeStamp,
+						timeStamp2 = timeStamp2,
+						qCode = qCode,
+						value = value
+					}
+				}
+			};
 
 			string requestBodyJson = JsonConvert.SerializeObject(bodyRequest);
+			Console.WriteLine("Отправляемое тело запроса: " + requestBodyJson);
+
 			using (Stream requestStream = webRequestWrite.GetRequestStream())
 			{
 				using (StreamWriter requestStreamWriter = new StreamWriter(requestStream))
@@ -114,11 +129,12 @@ namespace WriteRequestCK11
 		{
 			// Пример записи данных
 			writeDataToCK11(
-				"A3A59F7A-7EA9-4FC6-8CCD-9267769AA2B8",
+				"A879B6EB-F0B6-4708-A422-12E8890B1D4A",
 				"2024-12-11T22:05:00Z",
 				"2024-12-11T22:05:00Z",
-				0,
-				110.34);
+				// нужно вводить в Dec, в навигаторе данных отображает в Hex
+				805310466,
+				60);
 
 			Console.WriteLine("\nЗапись данных окончена.");
 			Console.ReadLine();
